@@ -86,6 +86,39 @@ const uploadImage = (file, progressCallback, urlCallback, errorCallback) => {
   );
 };
 
+const addProjectInDatabase = async (project) => {
+  if (typeof project !== "object") return;
+
+  const collectionRef = collection(db, "projects");
+  await addDoc(collectionRef, { ...project });
+};
+
+const updateProjectInDatabase = async (project, pid) => {
+  if (typeof project !== "object") return;
+
+  const docRef = doc(db, "projects", pid);
+  await setDoc(docRef, { ...project });
+};
+
+const getAllProjects = async () => {
+  return await getDocs(collection(db, "projects"));
+};
+
+const getAllProjectsForUser = async (uid) => {
+  if (!uid) return;
+
+  const collectionRef = collection(db, "projects");
+  const condition = where("refUser", "==", uid);
+  const dbQuery = query(collectionRef, condition);
+
+  return await getDocs(dbQuery);
+};
+
+const deleteProject = async (pid) => {
+  const docRef = doc(db, "projects", pid);
+  await deleteDoc(docRef);
+};
+
 export {
   app as default,
   auth,
@@ -93,4 +126,9 @@ export {
   updateUserDatabase,
   getUserFromDatabase,
   uploadImage,
+  addProjectInDatabase,
+  updateProjectInDatabase,
+  getAllProjects,
+  getAllProjectsForUser,
+  deleteProject,
 };

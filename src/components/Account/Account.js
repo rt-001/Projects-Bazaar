@@ -5,6 +5,7 @@ import { Link, Navigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
 import { auth, uploadImage, updateUserDatabase } from "../../firebase";
 import { signOut } from "firebase/auth";
+import ProjectForm from "./ProjectForm/ProjectForm";
 function Account(props) {
   const userDetails = props.userDetails;
   const isAuthenticated = props.auth;
@@ -25,6 +26,7 @@ function Account(props) {
   const [showSaveDetailsButton, setShowSaveDetailsButton] = useState(false);
   const [saveButtonDisabled, setSaveButtonDisabled] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showProjectForm, setShowProjectForm] = useState(false);
   const handleLogout = async () => {
     await signOut(auth);
   };
@@ -79,6 +81,12 @@ function Account(props) {
   };
   return isAuthenticated ? (
     <div className={styles.container}>
+      {showProjectForm && (
+        <ProjectForm
+          onClose={() => setShowProjectForm(false)}
+          uid={userDetails.uid}
+        />
+      )}
       <div className={styles.header}>
         <p className={styles.heading}>
           Welcome <span>{userProfileValues.name}</span>
@@ -155,6 +163,36 @@ function Account(props) {
                   Save Details
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div className={styles.section}>
+        <div className={styles.projectsHeader}>
+          <div className={styles.title}>Your Projects</div>
+          <button className="button" onClick={() => setShowProjectForm(true)}>
+            Add Project
+          </button>
+        </div>
+
+        <div className={styles.projects}>
+          <div className={styles.project}>
+            <p className={styles.title}> E-Commerce Website</p>
+            <div className={styles.links}>
+              <Edit2></Edit2>
+              <Trash></Trash>
+              <GitHub></GitHub>
+              <Paperclip></Paperclip>
+            </div>
+          </div>
+          <div className={styles.project}>
+            <p className={styles.title}>E-Commerce Website</p>
+            <div className={styles.links}>
+              <Edit2></Edit2>
+              <Trash></Trash>
+              <GitHub></GitHub>
+              <Paperclip></Paperclip>
             </div>
           </div>
         </div>

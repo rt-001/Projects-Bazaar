@@ -152,3 +152,49 @@
     text-align: center;
   }
   
+.projectsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .projects {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .projects .project {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+  }
+  
+  .project .title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  
+  .project .links {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+  
+  .project .links svg {
+    height: 22px;
+    width: 22px;
+    color: rgb(59, 59, 59);
+    transition: 200ms;
+    cursor: pointer;
+  }
+  
+  .project .links svg:hover {
+    color: #22c48b;
+  }
+
+  
