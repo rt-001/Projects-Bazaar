@@ -10,6 +10,7 @@ import Home from "./components/Home/Home";
 import { auth, getUserFromDatabase } from "./firebase";
 import Spinner from "./components/Spinner/Spinner";
 import "./App.css";
+import Account from "./components/Account/Account";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userDetails, setUserDetails] = useState({});
@@ -38,13 +39,19 @@ function App() {
       <Router>
         {isDataLoaded ? (
           <Routes>
-            <Route path="/" element={<Home auth={isAuthenticated} />} />
             {!isAuthenticated && (
               <>
                 <Route path="/login" element={<Auth />} />
                 <Route path="/signup" element={<Auth signup />} />
               </>
             )}
+            <Route
+              path="/account"
+              element={
+                <Account userDetails={userDetails} auth={isAuthenticated} />
+              }
+            />
+            <Route path="/" element={<Home auth={isAuthenticated} />} />
             <Route path="/*" element={<Navigate to="/" />} />
           </Routes>
         ) : (
