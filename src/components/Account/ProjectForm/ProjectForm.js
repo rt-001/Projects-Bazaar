@@ -4,16 +4,19 @@ import { X } from "react-feather";
 import Modal from "../../Modal/Modal";
 import InputControl from "../../InputControl/InputControl";
 
-import styles from "./ProjectForm.module.css";
 import {
   addProjectInDatabase,
   updateProjectInDatabase,
   uploadImage,
 } from "../../../firebase";
+
+import styles from "./ProjectForm.module.css";
+
 function ProjectForm(props) {
-  const isEdit = props.isEdit ? true : false;
   const fileInputRef = useRef();
+  const isEdit = props.isEdit ? true : false;
   const defaults = props.default;
+
   const [values, setValues] = useState({
     thumbnail: defaults?.thumbnail || "",
     title: defaults?.title || "",
@@ -32,10 +35,18 @@ function ProjectForm(props) {
     tempPoints[index] = value;
     setValues((prev) => ({ ...prev, points: tempPoints }));
   };
+
   const handleAddPoint = () => {
     if (values.points.length > 4) return;
     setValues((prev) => ({ ...prev, points: [...values.points, ""] }));
   };
+
+  const handlePointDelete = (index) => {
+    const tempPoints = [...values.points];
+    tempPoints.splice(index, 1);
+    setValues((prev) => ({ ...prev, points: tempPoints }));
+  };
+
   const handleFileInputChange = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -57,11 +68,7 @@ function ProjectForm(props) {
       }
     );
   };
-  const handlePointDelete = (index) => {
-    const tempPoints = [...values.points];
-    tempPoints.splice(index, 1);
-    setValues((prev) => ({ ...prev, points: tempPoints }));
-  };
+
   const validateForm = () => {
     const actualPoints = values.points.filter((item) => item.trim());
 
@@ -106,6 +113,7 @@ function ProjectForm(props) {
     if (props.onSubmission) props.onSubmission();
     if (props.onClose) props.onClose();
   };
+
   return (
     <Modal onClose={() => (props.onClose ? props.onClose() : "")}>
       <div className={styles.container}>
@@ -123,10 +131,9 @@ function ProjectForm(props) {
                   values.thumbnail ||
                   "https://www.agora-gallery.com/advice/wp-content/uploads/2015/10/image-placeholder-300x200.png"
                 }
-                onClick={() => fileInputRef.current.click()}
                 alt="Thumbnail"
+                onClick={() => fileInputRef.current.click()}
               />
-
               {imageUploadStarted && (
                 <p>
                   <span>{imageUploadProgress.toFixed(2)}%</span> Uploaded

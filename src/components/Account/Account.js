@@ -3,7 +3,14 @@ import { LogOut, Edit2, Trash, GitHub, Paperclip, Camera } from "react-feather";
 import InputControl from "../InputControl/InputControl";
 import { Link, Navigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
-import { auth, uploadImage, updateUserDatabase } from "../../firebase";
+import Spinner from "../Spinner/Spinner";
+import {
+  auth,
+  uploadImage,
+  updateUserDatabase,
+  getAllProjectsForUser,
+  deleteProject,
+} from "../../firebase";
 import { signOut } from "firebase/auth";
 import ProjectForm from "./ProjectForm/ProjectForm";
 function Account(props) {
@@ -27,15 +34,22 @@ function Account(props) {
   const [saveButtonDisabled, setSaveButtonDisabled] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showProjectForm, setShowProjectForm] = useState(false);
+  const [projectsLoaded, setProjectsLoaded] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [isEditProjectModal, setIsEditProjectModal] = useState(false);
+  const [editProject, setEditProject] = useState({});
   const handleLogout = async () => {
     await signOut(auth);
   };
+
   const handleCameraClick = () => {
     imagePicker.current.click();
   };
+
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (!file) return;
+
     setProfileImageUploadStarted(true);
     uploadImage(
       file,
@@ -54,6 +68,23 @@ function Account(props) {
       }
     );
   };
+
+  const updateProfileImageToDatabase = (url) => {
+    updateUserDatabase(
+      { ...userProfileValues, profileImage: url },
+      userDetails.uid
+    );
+  };
+
+  const handleInputChange = (event, property) => {
+    setShowSaveDetailsButton(true);
+
+    setUserProfileValues((prev) => ({
+      ...prev,
+      [property]: event.target.value,
+    }));
+  };
+
   const saveDetailsToDatabase = async () => {
     if (!userProfileValues.name) {
       setErrorMessage("Name required");
@@ -65,26 +96,44 @@ function Account(props) {
     setSaveButtonDisabled(false);
     setShowSaveDetailsButton(false);
   };
-  const updateProfileImageToDatabase = (url) => {
-    updateUserDatabase(
-      { ...userProfileValues, profileImage: url },
-      userDetails.uid
-    );
-  };
-  const handleInputChange = (event, property) => {
-    setShowSaveDetailsButton(true);
 
-    setUserProfileValues((prev) => ({
-      ...prev,
-      [property]: event.target.value,
-    }));
+  const fetchAllProjects = async () => {
+    const result = await getAllProjectsForUser(userDetails.uid);
+    if (!result) {
+      setProjectsLoaded(true);
+      return;
+    }
+    setProjectsLoaded(true);
+
+    let tempProjects = [];
+    result.forEach((doc) => tempProjects.push({ ...doc.data(), pid: doc.id }));
+    setProjects(tempProjects);
   };
+
+  const handleEditClick = (project) => {
+    setIsEditProjectModal(true);
+    setEditProject(project);
+    setShowProjectForm(true);
+  };
+
+  const handleDeletion = async (pid) => {
+    await deleteProject(pid);
+    fetchAllProjects();
+  };
+
+  useEffect(() => {
+    fetchAllProjects();
+  }, []);
+
   return isAuthenticated ? (
     <div className={styles.container}>
       {showProjectForm && (
         <ProjectForm
+          onSubmission={fetchAllProjects}
           onClose={() => setShowProjectForm(false)}
           uid={userDetails.uid}
+          isEdit={isEditProjectModal}
+          default={editProject}
         />
       )}
       <div className={styles.header}>
@@ -115,7 +164,7 @@ function Account(props) {
             </div>
             {profileImageUploadStarted ? (
               <p className={styles.progress}>
-                {progress == 100
+                {progress === 100
                   ? "Getting image url..."
                   : `${progress.toFixed(2)}% uploaded`}
               </p>
@@ -177,24 +226,34 @@ function Account(props) {
         </div>
 
         <div className={styles.projects}>
-          <div className={styles.project}>
-            <p className={styles.title}> E-Commerce Website</p>
-            <div className={styles.links}>
-              <Edit2></Edit2>
-              <Trash></Trash>
-              <GitHub></GitHub>
-              <Paperclip></Paperclip>
-            </div>
-          </div>
-          <div className={styles.project}>
-            <p className={styles.title}>E-Commerce Website</p>
-            <div className={styles.links}>
-              <Edit2></Edit2>
-              <Trash></Trash>
-              <GitHub></GitHub>
-              <Paperclip></Paperclip>
-            </div>
-          </div>
+          {projectsLoaded ? (
+            projects.length > 0 ? (
+              projects.map((item, index) => (
+                <div className={styles.project} key={item.title + index}>
+                  <p className={styles.title}>{item.title}</p>
+
+                  <div className={styles.links}>
+                    <Edit2 onClick={() => handleEditClick(item)} />
+                    <Trash onClick={() => handleDeletion(item.pid)} />
+                    <Link target="_blank" to={`//${item.github}`}>
+                      <GitHub />
+                    </Link>
+                    {item.link ? (
+                      <Link target="_blank" to={`//${item.link}`}>
+                        <Paperclip />
+                      </Link>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No projects found</p>
+            )
+          ) : (
+            <Spinner />
+          )}
         </div>
       </div>
     </div>
