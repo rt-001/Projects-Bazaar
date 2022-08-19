@@ -1,9 +1,12 @@
-import styles from "./Account.module.css";
-import { LogOut, Edit2, Trash, GitHub, Paperclip, Camera } from "react-feather";
-import InputControl from "../InputControl/InputControl";
-import { Link, Navigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
+import { signOut } from "firebase/auth";
+import { Camera, LogOut, Edit2, Trash, GitHub, Paperclip } from "react-feather";
+import { Link, Navigate } from "react-router-dom";
+
+import InputControl from "../InputControl/InputControl";
 import Spinner from "../Spinner/Spinner";
+import ProjectForm from "./ProjectForm/ProjectForm";
+
 import {
   auth,
   uploadImage,
@@ -11,12 +14,14 @@ import {
   getAllProjectsForUser,
   deleteProject,
 } from "../../firebase";
-import { signOut } from "firebase/auth";
-import ProjectForm from "./ProjectForm/ProjectForm";
+
+import styles from "./Account.module.css";
+
 function Account(props) {
   const userDetails = props.userDetails;
   const isAuthenticated = props.auth;
   const imagePicker = useRef();
+
   const [progress, setProgress] = useState(0);
   const [profileImageUploadStarted, setProfileImageUploadStarted] =
     useState(false);
@@ -38,6 +43,7 @@ function Account(props) {
   const [projects, setProjects] = useState([]);
   const [isEditProjectModal, setIsEditProjectModal] = useState(false);
   const [editProject, setEditProject] = useState({});
+
   const handleLogout = async () => {
     await signOut(auth);
   };
@@ -140,31 +146,30 @@ function Account(props) {
         <p className={styles.heading}>
           Welcome <span>{userProfileValues.name}</span>
         </p>
+
         <div className={styles.logout} onClick={handleLogout}>
-          <LogOut></LogOut> Logout
+          <LogOut /> Logout
         </div>
       </div>
       <input
         ref={imagePicker}
         type="file"
-        name=""
-        id=""
         style={{ display: "none" }}
         onChange={handleImageChange}
       />
       <div className={styles.section}>
-        <div className={styles.title}>Your Project</div>
+        <div className={styles.title}>Your profile</div>
         <div className={styles.profile}>
           <div className={styles.left}>
             <div className={styles.image}>
-              <img src={profileImageUrl} alt="Profile Image" />
+              <img src={profileImageUrl} alt="Profile image" />
               <div className={styles.camera} onClick={handleCameraClick}>
-                <Camera></Camera>
+                <Camera />
               </div>
             </div>
             {profileImageUploadStarted ? (
               <p className={styles.progress}>
-                {progress === 100
+                {progress == 100
                   ? "Getting image url..."
                   : `${progress.toFixed(2)}% uploaded`}
               </p>
@@ -182,22 +187,22 @@ function Account(props) {
               />
               <InputControl
                 label="Title"
-                value={userProfileValues.designation}
                 placeholder="eg. Full stack developer"
+                value={userProfileValues.designation}
                 onChange={(event) => handleInputChange(event, "designation")}
               />
             </div>
             <div className={styles.row}>
               <InputControl
                 label="Github"
-                value={userProfileValues.github}
                 placeholder="Enter your github link"
+                value={userProfileValues.github}
                 onChange={(event) => handleInputChange(event, "github")}
               />
               <InputControl
                 label="Linkedin"
-                value={userProfileValues.linkedin}
                 placeholder="Enter your linkedin link"
+                value={userProfileValues.linkedin}
                 onChange={(event) => handleInputChange(event, "linkedin")}
               />
             </div>
@@ -216,7 +221,9 @@ function Account(props) {
           </div>
         </div>
       </div>
+
       <hr />
+
       <div className={styles.section}>
         <div className={styles.projectsHeader}>
           <div className={styles.title}>Your Projects</div>
@@ -258,7 +265,7 @@ function Account(props) {
       </div>
     </div>
   ) : (
-    <Navigate to="/"></Navigate>
+    <Navigate to="/" />
   );
 }
 
